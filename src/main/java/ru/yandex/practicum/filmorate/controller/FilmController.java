@@ -18,13 +18,13 @@ public class FilmController {
     Map<Integer, Film> films = new HashMap<>();
 
     @GetMapping
-    public List<Film> getFilms() {
+    public List<Film> getAll() {
         return new ArrayList<>(films.values());
     }
     @PostMapping
-    public Film addFilm(@RequestBody Film film) throws ValidationException {
+    public Film addNew(@RequestBody Film film) {
         log.debug("Получен запрос на добавление фильма:\n" + film.toString());
-        if (!filmValidation(film))
+        if (!validation(film))
             throw new ValidationException();
         films.put(idGenerator, film);
         film.setId(idGenerator++);
@@ -32,10 +32,10 @@ public class FilmController {
         return film;
     }
     @PutMapping
-    public Film updateFilmData(@RequestBody Film film) throws ValidationException, NotFoundException {
+    public Film updateExistFilmData(@RequestBody Film film) {
         log.debug("Получен запрос на изменение данных фильма:\n" + film.toString());
         if (films.containsKey(film.getId())) {
-            if (!filmValidation(film))
+            if (!validation(film))
                 throw new ValidationException();
             films.put(film.getId(), film);
         } else {
@@ -47,7 +47,7 @@ public class FilmController {
         return film;
     }
 
-    private boolean filmValidation(Film film) {
+    private boolean validation(Film film) {
         final int maxDescriptionLength = 200;
         final LocalDate minReleaseDate = LocalDate.of(1895, 12, 28);
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");

@@ -18,13 +18,13 @@ public class UserController {
     private int idGenerator = 1;
 
     @GetMapping
-    public List<User> getUsers() {
+    public List<User> getAll() {
         return new ArrayList<>(users.values());
     }
     @PostMapping
-    public User addUser(@RequestBody User user) throws ValidationException {
+    public User addNew(@RequestBody User user) {
         log.debug("Получен запрос на добавление пользователя:\n" + user.toString());
-        if(!userValidation(user))
+        if(!validation(user))
             throw new ValidationException();
         users.put(idGenerator, user);
         user.setId(idGenerator++);
@@ -34,10 +34,10 @@ public class UserController {
         return user;
     }
     @PutMapping
-    public User updateUserData(@RequestBody User user) throws ValidationException, NotFoundException {
+    public User updateExistUserData(@RequestBody User user) {
         log.debug("Получен запрос на изменение данных пользователя:\n" + user.toString());
         if (users.containsKey(user.getId())){
-            if (!userValidation(user))
+            if (!validation(user))
                 throw new ValidationException();
             users.put(user.getId(), user);
             if (user.getName().isBlank())
@@ -50,7 +50,7 @@ public class UserController {
         return user;
     }
 
-    private boolean userValidation(User user) {
+    private boolean validation(User user) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         if (user.getEmail().isBlank() || !user.getEmail().contains("@")) {
