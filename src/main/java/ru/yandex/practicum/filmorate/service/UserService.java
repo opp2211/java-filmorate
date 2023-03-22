@@ -17,11 +17,24 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+    public User add(User user) {
+        return userStorage.add(user);
+    }
+    public User remove(int id) {
+        return userStorage.remove(id);
+    }
+    public User update(User user) {
+        return userStorage.update(user);
+    }
+    public User get(int id) {
+        return userStorage.get(id);
+    }
+
+
     public void addFriendToUser(int userId, int friendId) {
         userStorage.get(userId).getFriendsIds().add(friendId);
         userStorage.get(friendId).getFriendsIds().add(userId);
     }
-
     public void removeUserFriend(int userId, int friendId) {
         userStorage.get(userId).getFriendsIds().remove(friendId);
         userStorage.get(friendId).getFriendsIds().remove(userId);
