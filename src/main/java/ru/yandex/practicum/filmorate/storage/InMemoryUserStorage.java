@@ -38,4 +38,13 @@ public class InMemoryUserStorage implements UserStorage {
         }
         return usersMap.put(id, user);
     }
+
+    @Override
+    public User get(int id) {
+        if (!usersMap.containsKey(id)) {
+            throw new NotFoundException(String.format("Пользователь с ID=%d не найден", id));
+        }
+        return usersMap.get(id);
+    }
+
 }

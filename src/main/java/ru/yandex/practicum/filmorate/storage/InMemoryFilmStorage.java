@@ -5,8 +5,11 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -36,5 +39,21 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new NotFoundException(String.format("Фильм с ID=%d не найден", id));
         }
         return filmsMap.put(id, film);
+    }
+
+    @Override
+    public Film get(int id) {
+        if (!filmsMap.containsKey(id)) {
+            throw new NotFoundException(String.format("Фильм с ID=%d не найден", id));
+        }
+        return filmsMap.get(id);
+    }
+
+    @Override
+    public Collection<Film> getMostPopulars(int limit) { // Где валидировать limit ?
+        return filmsMap.values().stream()
+                .sorted(Comparator.comparing(film -> film.getUserIdLikes().size()))
+                .limit(limit)
+                .collect(Collectors.toSet());
     }
 }

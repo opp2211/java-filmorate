@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Builder
 @Data
@@ -21,4 +22,6 @@ public class User {
     private String name;
     @Past
     private LocalDate birthday;
+
+    private Set<Integer> friendsIds;
 }

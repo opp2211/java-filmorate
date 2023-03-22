@@ -6,4 +6,5 @@ public interface UserStorage {
     User add(User user);
     User remove(int id);
     User update(User user);
+    User get(int id);
 }
