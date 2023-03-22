@@ -9,5 +9,6 @@ public interface FilmStorage {
     Film remove(int id);
     Film update(Film film);
     Film get(int id);
-    Collection<Film> getMostPopulars(int limit); //Какой тип лучше использовать Collection/List ?
+    Collection<Film> getAll();
+    Collection<Film> getMostPopulars(int count); //Какой тип лучше использовать Collection/List ?
 }

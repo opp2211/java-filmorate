@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.Set;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,20 +29,28 @@ public class UserService {
     public User get(int id) {
         return userStorage.get(id);
     }
+    public Collection<User> getAll() {
+        return userStorage.getAll();
+    }
 
 
     public void addFriendToUser(int userId, int friendId) {
-        userStorage.get(userId).getFriendsIds().add(friendId);
+        userStorage.get(userId).getFriendsIds().add(friendId); //todo Валидация friendId
         userStorage.get(friendId).getFriendsIds().add(userId);
     }
     public void removeUserFriend(int userId, int friendId) {
         userStorage.get(userId).getFriendsIds().remove(friendId);
         userStorage.get(friendId).getFriendsIds().remove(userId);
     }
-    public Set<User> getMutualFriends(int userId, int friendId) {
+    public Collection<User> getFriends(int userId) {
         return userStorage.get(userId).getFriendsIds().stream()
                 .map(userStorage::get)
-                .filter(user -> userStorage.get(friendId).getFriendsIds().contains(user))
+                .collect(Collectors.toSet());
+    }
+    public Collection<User> getMutualFriends(int userId, int friendId) {
+        return userStorage.get(userId).getFriendsIds().stream()
+                .filter(userStorage.get(friendId).getFriendsIds()::contains)
+                .map(userStorage::get)
                 .collect(Collectors.toSet());
     }
 

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> filmsMap = new HashMap<>();
-    private int idGenerator = 0;
+    private int idGenerator = 1;
 
     @Override
     public Film add(@Valid Film film) {
@@ -50,10 +50,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getMostPopulars(int limit) { // Где валидировать limit ?
+    public Collection<Film> getAll() {
+        return filmsMap.values();
+    }
+
+    @Override
+    public Collection<Film> getMostPopulars(int count) { // Где валидировать limit ?
         return filmsMap.values().stream()
                 .sorted(Comparator.comparing(film -> film.getUserIdLikes().size()))
-                .limit(limit)
+                .limit(count)
                 .collect(Collectors.toSet());
     }
 }
