@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @Slf4j
@@ -24,11 +25,11 @@ public class FilmController {
         return filmService.getAll();
     }
     @PostMapping
-    public Film addNew(@RequestBody Film film) { //todo На каком уровне должна быть валидация?
+    public Film addNew(@RequestBody @Valid Film film) {
         return filmService.add(film);
     }
     @PutMapping
-    public Film updateExistFilmData(@RequestBody Film film) {
+    public Film updateExistFilmData(@RequestBody @Valid Film film) {
         return filmService.update(film);
     }
     @GetMapping("/{id}")

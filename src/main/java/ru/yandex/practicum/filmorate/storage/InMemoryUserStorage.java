@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import javax.validation.Valid;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +14,7 @@ public class InMemoryUserStorage implements UserStorage {
     private int idGenerator = 1;
 
     @Override
-    public User add(@Valid User user) {
+    public User add(User user) {
         int newId = idGenerator++;
         usersMap.put(newId, user);
         user.setId(newId);
@@ -31,7 +30,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User update(@Valid User user) {
+    public User update(User user) {
         int id = user.getId();
         if (!usersMap.containsKey(id)) {
             throw new NotFoundException(String.format("Пользователь с ID=%d не найден", id));
