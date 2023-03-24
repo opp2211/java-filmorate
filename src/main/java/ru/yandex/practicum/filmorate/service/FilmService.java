@@ -2,18 +2,22 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.Collection;
+import java.util.Set;
 
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserService userService;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserService userService) {
         this.filmStorage = filmStorage;
+        this.userService = userService;
     }
 
     public Film add(Film film) {
@@ -33,9 +37,15 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        filmStorage.get(filmId).getUserIdLikes().add(userId);
+        if (userService.get(userId) != null) {
+            filmStorage.get(filmId).getUserIdLikes().add(userId);
+        }
     }
     public void removeLike(int filmId, int userId) {
+        Set<Integer> userIdLikes = filmStorage.get(filmId).getUserIdLikes();
+        if (!userIdLikes.contains(userId)) {
+            throw new NotFoundException(String.format("Лайк пользователя (userId=%d) фильму (filmId=%d) не найден", userId, filmId));
+        }
         filmStorage.get(filmId).getUserIdLikes().remove(userId);
     }
     public Collection<Film> getMostPopulars(int count) {
