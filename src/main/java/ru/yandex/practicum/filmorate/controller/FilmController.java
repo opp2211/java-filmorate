@@ -37,15 +37,15 @@ public class FilmController {
         return filmService.get(id);
     }
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable("id") int filmId, @PathVariable int userId) { //todo Возвращаемое тело ?
+    public void addLike(@PathVariable("id") int filmId, @PathVariable int userId) { //todo: Возвращаемое тело ? Валидация ?
         filmService.addLike(filmId, userId);
     }
     @DeleteMapping("/{id}/like/{userId}")
-    public void removeLike(@PathVariable("id") int filmId, @PathVariable int userId) { //todo Возвращаемое тело ?
+    public void removeLike(@PathVariable("id") int filmId, @PathVariable int userId) { //todo: Возвращаемое тело ? Валидация ?
         filmService.removeLike(filmId, userId);
     }
     @GetMapping("/popular")
-    public Collection<Film> getMostPopulars(@RequestParam(defaultValue = "10") int count) { //todo Валидация ?
+    public Collection<Film> getMostPopulars(@RequestParam(defaultValue = "10") int count) { //todo: Валидация ?
         return filmService.getMostPopulars(count);
     }
 }
