@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,8 +36,10 @@ public class UserService {
 
 
     public void addFriendToUser(int userId, int friendId) {
-        userStorage.get(userId).getFriendsIds().add(friendId); //todo Валидация friendId
-        userStorage.get(friendId).getFriendsIds().add(userId);
+        User user = userStorage.get(userId);
+        User friend = userStorage.get(friendId);
+        user.getFriendsIds().add(friendId);
+        friend.getFriendsIds().add(userId);
     }
     public void removeUserFriend(int userId, int friendId) {
         userStorage.get(userId).getFriendsIds().remove(friendId);
@@ -45,7 +48,8 @@ public class UserService {
     public Collection<User> getFriends(int userId) {
         return userStorage.get(userId).getFriendsIds().stream()
                 .map(userStorage::get)
-                .collect(Collectors.toSet());
+                .sorted(Comparator.comparing(User::getId)) //сортировка для тестов postman
+                .collect(Collectors.toList());
     }
     public Collection<User> getMutualFriends(int userId, int friendId) {
         return userStorage.get(userId).getFriendsIds().stream()
