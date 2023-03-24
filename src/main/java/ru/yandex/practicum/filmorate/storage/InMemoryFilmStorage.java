@@ -34,7 +34,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (!filmsMap.containsKey(id)) {
             throw new NotFoundException(String.format("Фильм с ID=%d не найден", id));
         }
-        return filmsMap.put(id, film);
+        filmsMap.put(id, film);
+        return film;
     }
 
     @Override

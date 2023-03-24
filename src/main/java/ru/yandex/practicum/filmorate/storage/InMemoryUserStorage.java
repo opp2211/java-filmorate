@@ -35,7 +35,8 @@ public class InMemoryUserStorage implements UserStorage {
         if (!usersMap.containsKey(id)) {
             throw new NotFoundException(String.format("Пользователь с ID=%d не найден", id));
         }
-        return usersMap.put(id, user);
+        usersMap.put(id, user);
+        return user;
     }
 
     @Override
