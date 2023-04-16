@@ -8,8 +8,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,6 +34,8 @@ public class FilmControllerTest {
                 .description("filmDescription1")
                 .duration(100)
                 .releaseDate(LocalDate.of(2014,5,12))
+                .genres(Collections.emptyList())
+                .mpa(Mpa.builder().id(2).build())
                 .build();
 
         mockMvc.perform(post("/films")
