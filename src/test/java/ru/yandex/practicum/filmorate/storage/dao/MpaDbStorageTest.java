@@ -21,15 +21,15 @@ public class MpaDbStorageTest {
 
     @Test
     public void testMpaGet() {
-        int MPA_CORRECT_ID = 1;
-        Mpa testMpa = mpaDbStorage.get(MPA_CORRECT_ID);
-        assertEquals(MPA_CORRECT_ID, testMpa.getId());
+        int mpaCorrectId = 1;
+        Mpa testMpa = mpaDbStorage.get(mpaCorrectId);
+        assertEquals(mpaCorrectId, testMpa.getId());
     }
 
     @Test
     public void testMpaWrongIdGet() {
-        int MPA_INCORRECT_ID = -1;
-        assertThrows(NotFoundException.class, () -> mpaDbStorage.get(MPA_INCORRECT_ID));
+        int mpaIncorrectId = -1;
+        assertThrows(NotFoundException.class, () -> mpaDbStorage.get(mpaIncorrectId));
     }
 
     @Test
