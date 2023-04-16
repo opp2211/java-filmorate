@@ -37,13 +37,19 @@ public class UserDbStorage implements UserStorage {
         parameters.put("birthday", Date.valueOf(user.getBirthday()));
         Number newId = simpleJdbcInsert.executeAndReturnKey(parameters);
         user.setId(newId.intValue());
-        return user;
+        return get(user.getId());
     }
 
     @Override
     public void remove(int id) {
         String sql = "DELETE FROM users WHERE user_id = ?";
         jdbcTemplate.update(sql, id);
+    }
+
+    @Override
+    public void removeAll() {
+        String sql = "DELETE FROM users";
+        jdbcTemplate.update(sql);
     }
 
     @Override
@@ -62,7 +68,7 @@ public class UserDbStorage implements UserStorage {
                 user.getEmail(),
                 user.getBirthday(),
                 user.getId());
-        return user;
+        return get(user.getId());
     }
 
     @Override

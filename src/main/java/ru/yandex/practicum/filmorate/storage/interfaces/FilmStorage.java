@@ -9,6 +9,8 @@ public interface FilmStorage {
 
     void remove(int id);
 
+    void removeAll();
+
     Film update(Film film);
 
     Film get(int id);

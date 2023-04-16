@@ -9,6 +9,8 @@ public interface UserStorage {
 
     void remove(int id);
 
+    void removeAll();
+
     User update(User user);
 
     User get(int id);

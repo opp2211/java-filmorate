@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.MpaStorage;
 
 import javax.sql.DataSource;
 import java.sql.Date;
@@ -27,6 +27,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
     private final GenreStorage genreStorage;
+    private final MpaStorage mpaStorage;
 
     @Override
     public Film add(Film film) {
@@ -55,6 +56,12 @@ public class FilmDbStorage implements FilmStorage {
     public void remove(int id) {
         String sql = "DELETE FROM film WHERE film_id = ?";
         jdbcTemplate.update(sql, id);
+    }
+
+    @Override
+    public void removeAll() {
+        String sql = "DELETE FROM film";
+        jdbcTemplate.update(sql);
     }
 
     @Override
@@ -139,21 +146,8 @@ public class FilmDbStorage implements FilmStorage {
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getInt("duration"))
-                .mpa(getMpa(rs.getInt("mpa_id")))
+                .mpa(mpaStorage.get(rs.getInt("mpa_id")))
                 .genres(genreStorage.getFilmGenres(rs.getInt("film_id")))
-                .build();
-    }
-
-    private Mpa getMpa(int mpaId) {
-        String sql = "SELECT mpa_id, name " +
-                "FROM mpa WHERE mpa_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToMpa, mpaId);
-    }
-
-    private Mpa mapRowToMpa(ResultSet rs, int rowNum) throws SQLException {
-        return Mpa.builder()
-                .id(rs.getInt("mpa_id"))
-                .name(rs.getString("name"))
                 .build();
     }
 }

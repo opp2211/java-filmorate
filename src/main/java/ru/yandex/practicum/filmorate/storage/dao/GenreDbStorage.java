@@ -46,7 +46,7 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public void addFilmGenre(int filmId, int genreId) {
-        if(!getFilmGenres(filmId).stream().map(Genre::getId).anyMatch( id -> id == genreId)) {
+        if (getFilmGenres(filmId).stream().map(Genre::getId).noneMatch(id -> id == genreId)) {
             String sql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?) ";
             jdbcTemplate.update(sql, filmId, genreId);
         }
@@ -56,6 +56,12 @@ public class GenreDbStorage implements GenreStorage {
     public void removeFilmGenres(int filmId) {
         String sql = "DELETE FROM film_genre WHERE film_id = ?";
         jdbcTemplate.update(sql, filmId);
+    }
+
+    @Override
+    public void removeAllFilmGenres() {
+        String sql = "DELETE FROM film_genre";
+        jdbcTemplate.update(sql);
     }
 
     private Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
