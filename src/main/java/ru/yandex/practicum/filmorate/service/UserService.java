@@ -8,8 +8,8 @@ import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 import java.util.Collection;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
 

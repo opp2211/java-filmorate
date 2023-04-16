@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -17,17 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Slf4j
-@Component
 @Primary
+@Component
+@RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
-
-    public UserDbStorage(JdbcTemplate jdbcTemplate, DataSource dataSource) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.dataSource = dataSource;
-    }
 
     @Override
     public User add(User user) {
