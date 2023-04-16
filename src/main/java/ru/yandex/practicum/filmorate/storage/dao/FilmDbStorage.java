@@ -1,14 +1,16 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
 
 import javax.sql.DataSource;
 import java.sql.Date;
@@ -18,16 +20,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
 @Primary
+@Repository
+@RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
-
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, DataSource dataSource) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.dataSource = dataSource;
-    }
+    private final GenreStorage genreStorage;
 
     @Override
     public Film add(Film film) {
@@ -45,7 +44,7 @@ public class FilmDbStorage implements FilmStorage {
 
         if (film.getGenres() != null && film.getGenres().size() > 0) {
             for (Genre genre : film.getGenres()) {
-                addFilmGenre(newId.intValue(), genre.getId());
+                genreStorage.addFilmGenre(newId.intValue(), genre.getId());
             }
         }
 
@@ -77,10 +76,10 @@ public class FilmDbStorage implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId());
 
-
+        genreStorage.removeFilmGenres(film.getId());
         if (film.getGenres() != null && film.getGenres().size() > 0) {
             for (Genre genre : film.getGenres()) {
-                addFilmGenre(film.getId(), genre.getId());
+                genreStorage.addFilmGenre(film.getId(), genre.getId());
             }
         }
         return get(film.getId());
@@ -141,7 +140,7 @@ public class FilmDbStorage implements FilmStorage {
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getInt("duration"))
                 .mpa(getMpa(rs.getInt("mpa_id")))
-                .genres(getFilmGenres(rs.getInt("film_id")))
+                .genres(genreStorage.getFilmGenres(rs.getInt("film_id")))
                 .build();
     }
 
@@ -156,25 +155,5 @@ public class FilmDbStorage implements FilmStorage {
                 .id(rs.getInt("mpa_id"))
                 .name(rs.getString("name"))
                 .build();
-    }
-
-    private List<Genre> getFilmGenres(int filmId) {
-        String sql = "SELECT g.genre_id, g.name " +
-                "FROM film_genre fg " +
-                "JOIN genre g ON fg.genre_id = g.genre_id " +
-                "AND fg.film_id = ? ";
-        return jdbcTemplate.query(sql, this::mapRowToGenre, filmId);
-    }
-
-    private Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
-        return Genre.builder()
-                .id(rs.getInt("genre_id"))
-                .name(rs.getString("name"))
-                .build();
-    }
-
-    private void addFilmGenre(int film_id, int genre_id) {
-        String sql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
-        jdbcTemplate.update(sql, film_id, genre_id);
     }
 }
