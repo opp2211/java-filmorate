@@ -91,29 +91,39 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(int userId, int friendId) {
-        try {
-            User user = get(userId);
-        } catch (Exception e) {
-            throw new NotFoundException("Пользователь с id = " + userId + " не найден!");
-        }
-        try {
-            User friend = get(friendId);
-        } catch (Exception e) {
-            throw new NotFoundException("Пользователь с id = " + friendId + " не найден!");
+        boolean isAccepted = false;
+
+        get(userId);
+        get(friendId); // Проверка наличия пользователей в базе
+        if (hasFriendship(friendId, userId)) {
+            isAccepted = true;
+            updateFriendship(friendId, userId, true);
         }
 
         String sql = "INSERT INTO user_friend (user_id, friend_id, is_accepted) " +
                 "VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql,
-                userId,
-                friendId,
-                false);
+        jdbcTemplate.update(sql, userId, friendId, isAccepted);
+    }
+
+    private boolean hasFriendship(int userId, int friendId) {
+        String sql = "SELECT count(*) FROM user_friend WHERE user_id = ? AND friend_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> rs.getInt(1), userId, friendId);
+
+        return count != null && count > 0;
+    }
+
+    private void updateFriendship(int userId, int friendId, boolean isAccepted) {
+        String sql = "UPDATE user_friend SET " +
+                "is_accepted = ? " +
+                "WHERE user_id = ? AND friend_id = ? ";
+        jdbcTemplate.update(sql, isAccepted, userId, friendId);
     }
 
     @Override
     public void removeFriend(int userId, int friendId) {
         String sql = "DELETE FROM user_friend WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sql, userId, friendId);
+        updateFriendship(friendId, userId, false);
     }
 
     @Override
