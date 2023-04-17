@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmGenreStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.UserLikeFilmStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.*;
 
 import java.util.List;
 
@@ -17,6 +15,8 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final FilmGenreStorage filmGenreStorage;
+    private final GenreStorage genreStorage;
+    private final MpaStorage mpaStorage;
     private final UserLikeFilmStorage userLikeFilmStorage;
 
     public Film add(Film film) {
@@ -58,7 +58,10 @@ public class FilmService {
 
     public Film get(int id) {
         try {
-            return filmStorage.get(id);
+            Film film = filmStorage.get(id);
+            film.setGenres(genreStorage.getFilmGenres(film.getId()));
+            film.setMpa(mpaStorage.get(film.getMpa().getId()));
+            return film;
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Фильм с id = " + id + " не найден!");
         }
