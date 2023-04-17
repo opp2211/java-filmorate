@@ -13,7 +13,5 @@ public interface GenreStorage {
 
     List<Genre> getFilmGenres(int filmId);
 
-    void removeFilmGenres(int filmId);
-
     void removeAllFilmGenres();
 }
