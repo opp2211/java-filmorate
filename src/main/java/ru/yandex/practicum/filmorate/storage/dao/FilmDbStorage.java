@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.MpaStorage;
@@ -30,7 +29,7 @@ public class FilmDbStorage implements FilmStorage {
     private final MpaStorage mpaStorage;
 
     @Override
-    public Film add(Film film) {
+    public int add(Film film) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("film")
                 .usingGeneratedKeyColumns("film_id");
@@ -41,15 +40,8 @@ public class FilmDbStorage implements FilmStorage {
         parameters.put("release_date", Date.valueOf(film.getReleaseDate()));
         parameters.put("duration", film.getDuration());
         parameters.put("mpa_id", film.getMpa().getId());
-        Number newId = simpleJdbcInsert.executeAndReturnKey(parameters);
 
-        if (film.getGenres() != null && film.getGenres().size() > 0) {
-            for (Genre genre : film.getGenres()) {
-                genreStorage.addFilmGenre(newId.intValue(), genre.getId());
-            }
-        }
-
-        return get(newId.intValue());
+        return simpleJdbcInsert.executeAndReturnKey(parameters).intValue();
     }
 
     @Override
@@ -65,13 +57,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film update(Film film) {
-        try {
-            get(film.getId());
-        } catch (Exception e) {
-            throw new NotFoundException("Фильм с id = " + film.getId() + " не найден!");
-        }
-
+    public void update(Film film) {
+        //todo проверять наличие фильма?
         String sql = "UPDATE film SET " +
                 "title = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? " +
                 "WHERE film_id = ?";
@@ -82,26 +69,14 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDuration(),
                 film.getMpa().getId(),
                 film.getId());
-
-        genreStorage.removeFilmGenres(film.getId());
-        if (film.getGenres() != null && film.getGenres().size() > 0) {
-            for (Genre genre : film.getGenres()) {
-                genreStorage.addFilmGenre(film.getId(), genre.getId());
-            }
-        }
-        return get(film.getId());
+        //todo проверить через возврат апдейта?
     }
 
     @Override
     public Film get(int id) {
-
-        try {
-            String sql = "SELECT film_id, title, description, release_date, duration, mpa_id " +
-                    "FROM film WHERE film_id = ?";
-            return jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id);
-        } catch (Exception e) {
-            throw new NotFoundException("Фильм с id = " + id + " не найден!");
-        }
+        String sql = "SELECT film_id, title, description, release_date, duration, mpa_id " +
+                "FROM film WHERE film_id = ?";
+        return jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id);
     }
 
     @Override
