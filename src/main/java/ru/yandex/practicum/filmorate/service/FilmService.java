@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.UserLikeFilmStorage;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final FilmGenreStorage filmGenreStorage;
+    private final UserLikeFilmStorage userLikeFilmStorage;
 
     public Film add(Film film) {
         int newId = filmStorage.add(film);
@@ -67,11 +69,11 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        filmStorage.addLike(filmId, userId);
+        userLikeFilmStorage.addLike(filmId, userId);
     }
 
     public void removeLike(int filmId, int userId) {
-        filmStorage.removeLike(filmId, userId);
+        userLikeFilmStorage.removeLike(filmId, userId);
     }
 
     public List<Film> getMostPopulars(int count) {
