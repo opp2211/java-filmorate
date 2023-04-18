@@ -12,7 +12,7 @@ import java.sql.SQLException;
 @Repository
 @RequiredArgsConstructor
 public class FilmGenreDbStorage implements FilmGenreStorage {
-    JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
     @Override
     public void batchAddFilmGenre(int filmId, int[] genreIds) {
         String sql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?) ";

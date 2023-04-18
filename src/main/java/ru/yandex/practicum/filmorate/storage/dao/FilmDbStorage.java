@@ -51,19 +51,18 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void update(Film film) {
-        //todo проверять наличие фильма?
+    public boolean update(Film film) {
         String sql = "UPDATE film SET " +
                 "title = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? " +
                 "WHERE film_id = ?";
-        jdbcTemplate.update(sql,
+        int rowAffected = jdbcTemplate.update(sql,
                 film.getName(),
                 film.getDescription(),
-                film.getReleaseDate(),
+                Date.valueOf(film.getReleaseDate()),
                 film.getDuration(),
                 film.getMpa().getId(),
                 film.getId());
-        //todo проверить через возврат апдейта?
+        return rowAffected > 0;
     }
 
     @Override

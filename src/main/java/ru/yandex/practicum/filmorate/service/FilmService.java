@@ -27,10 +27,10 @@ public class FilmService {
                     film.getId(),
                     film.getGenres().stream()
                             .mapToInt(Genre::getId)
+                            .distinct()
                             .toArray());
         }
-        //todo: запрашивать и устанавливать названия жанров?
-        return film;
+        return get(newId);
     }
 
     public void remove(int id) {
@@ -38,26 +38,25 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        filmStorage.update(film);
-        /* todo как обновить фильм-жанры?
-            удалить существующие из базы, а затем положить новые? <--
-            или запросить существующие, сравнить с новыми и затем удалить лишние и/или положить недостающие? */
+        if (!filmStorage.update(film)) {
+            throw new NotFoundException("Фильм с id = " + film.getId() + " не найден!");
+        }
+
         filmGenreStorage.removeFilmGenre(film.getId());
         if (film.getGenres() != null && film.getGenres().size() > 0) {
             filmGenreStorage.batchAddFilmGenre(
                     film.getId(),
                     film.getGenres().stream()
                             .mapToInt(Genre::getId)
+                            .distinct()
                             .toArray());
         }
-        //todo: запрашивать и устанавливать названия жанров?
-        //todo: проверять наличие фильма?
-        //todo: ловить исключение?
-        return film;
+        return get(film.getId());
     }
 
     public Film get(int id) {
         try {
+            //todo как нормально собрать фильм?
             Film film = filmStorage.get(id);
             film.setGenres(genreStorage.getFilmGenres(film.getId()));
             film.setMpa(mpaStorage.get(film.getMpa().getId()));
@@ -68,7 +67,13 @@ public class FilmService {
     }
 
     public List<Film> getAll() {
-        return filmStorage.getAll();
+        List<Film> films = filmStorage.getAll();
+        //todo как нормально собрать фильм?
+        for (Film film : films) {
+            film.setGenres(genreStorage.getFilmGenres(film.getId()));
+            film.setMpa(mpaStorage.get(film.getMpa().getId()));
+        }
+        return films;
     }
 
     public void addLike(int filmId, int userId) {
@@ -80,6 +85,12 @@ public class FilmService {
     }
 
     public List<Film> getMostPopulars(int count) {
-        return filmStorage.getMostPopulars(count);
+        List<Film> films = filmStorage.getMostPopulars(count);
+        //todo нормально собрать фильм
+        for (Film film : films) {
+            film.setGenres(genreStorage.getFilmGenres(film.getId()));
+            film.setMpa(mpaStorage.get(film.getMpa().getId()));
+        }
+        return films;
     }
 }
