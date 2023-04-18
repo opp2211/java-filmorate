@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class Film {
     private int id;

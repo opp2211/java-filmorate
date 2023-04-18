@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.interfaces.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
 
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GenreDbStorageTest {
     private final GenreStorage genreStorage;
     private final FilmStorage filmStorage;
+    private final FilmGenreStorage filmGenreStorage;
 
     @Test
     public void genreGetTest() {
@@ -55,79 +57,45 @@ public class GenreDbStorageTest {
         List<Genre> genreList = List.of(
                 Genre.builder().id(2).build(),
                 Genre.builder().id(4).build());
-        Film film = filmStorage.add(Film.builder()
+
+        Film film = Film.builder()
                 .name("1")
                 .description("111")
                 .releaseDate(LocalDate.of(2010, 12, 10))
                 .duration(135)
                 .genres(genreList)
                 .mpa(Mpa.builder().id(5).build())
-                .build());
+                .build();
 
-        List<Genre> listFromDB = genreStorage.getFilmGenres(film.getId());
+        int newId = filmStorage.add(film);
+        filmGenreStorage.batchAddFilmGenre(
+                newId,
+                genreList.stream()
+                        .mapToInt(Genre::getId)
+                        .toArray());
+
+        List<Genre> listFromDB = genreStorage.getFilmGenres(newId);
 
         assertEquals(genreList.size(), listFromDB.size());
         assertEquals(genreList.get(1).getId(), listFromDB.get(1).getId());
     }
 
     @Test
-    public void addFilmGenreTest() {
+    public void removeAllFilmGenresTest() {
         List<Genre> genreList = List.of(
                 Genre.builder().id(2).build(),
                 Genre.builder().id(4).build());
-        Film film = filmStorage.add(Film.builder()
+        Film film = Film.builder()
                 .name("1")
                 .description("111")
                 .releaseDate(LocalDate.of(2010, 12, 10))
                 .duration(135)
                 .genres(genreList)
                 .mpa(Mpa.builder().id(5).build())
-                .build());
+                .build();
+        filmStorage.add(film);
 
-        genreStorage.addFilmGenre(film.getId(), 6);
-        List<Genre> listFromDB = genreStorage.getFilmGenres(film.getId());
-
-        assertEquals(3, listFromDB.size());
-        assertTrue(listFromDB.stream().mapToInt(Genre::getId).anyMatch(id -> id == 6));
-    }
-
-    @Test
-    public void addFilmGenreDuplicateTest() {
-        List<Genre> genreList = List.of(
-                Genre.builder().id(2).build(),
-                Genre.builder().id(4).build());
-        Film film = filmStorage.add(Film.builder()
-                .name("1")
-                .description("111")
-                .releaseDate(LocalDate.of(2010, 12, 10))
-                .duration(135)
-                .genres(genreList)
-                .mpa(Mpa.builder().id(5).build())
-                .build());
-
-        genreStorage.addFilmGenre(film.getId(), 6);
-        genreStorage.addFilmGenre(film.getId(), 6);
-        List<Genre> listFromDB = genreStorage.getFilmGenres(film.getId());
-
-        assertEquals(3, listFromDB.size());
-        assertTrue(listFromDB.stream().mapToInt(Genre::getId).anyMatch(id -> id == 6));
-    }
-
-    @Test
-    public void removeFilmGenreTest() {
-        List<Genre> genreList = List.of(
-                Genre.builder().id(2).build(),
-                Genre.builder().id(4).build());
-        Film film = filmStorage.add(Film.builder()
-                .name("1")
-                .description("111")
-                .releaseDate(LocalDate.of(2010, 12, 10))
-                .duration(135)
-                .genres(genreList)
-                .mpa(Mpa.builder().id(5).build())
-                .build());
-
-        genreStorage.removeFilmGenres(film.getId());
+        genreStorage.removeAllFilmGenres();
         List<Genre> listFromDB = genreStorage.getFilmGenres(film.getId());
 
         assertEquals(0, listFromDB.size());

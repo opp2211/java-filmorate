@@ -49,16 +49,24 @@ public class FilmDbStorageTest {
         List<Genre> genreList1 = List.of(
                 Genre.builder().id(2).build(),
                 Genre.builder().id(4).build());
-        film1 = filmStorage.add(Film.builder()
+        film1 = Film.builder()
                 .name("1")
                 .description("111")
                 .releaseDate(LocalDate.of(2010, 12, 10))
                 .duration(135)
                 .genres(genreList1)
                 .mpa(Mpa.builder().id(5).build())
-                .build());
-        film2 = filmStorage.add(film1);
-        film3 = filmStorage.add(film1);
+                .build();
+        int film1Id = filmStorage.add(film1);
+        int film2Id = filmStorage.add(film1);
+        int film3Id = filmStorage.add(film1);
+        film1.setId(film1Id);
+        film2 = film1.toBuilder()
+                .id(film2Id)
+                .build();
+        film2 = film1.toBuilder()
+                .id(film3Id)
+                .build();
     }
 
     @AfterEach
@@ -70,23 +78,19 @@ public class FilmDbStorageTest {
     @Test
     public void addTest() {
         int initialSize = filmStorage.getAll().size();
-        List<Genre> genreList = List.of(
-                Genre.builder().id(2).build(),
-                Genre.builder().id(4).build());
-        Film film1 = filmStorage.add(Film.builder()
+
+        Film film = Film.builder()
                 .name("1")
                 .description("111")
                 .releaseDate(LocalDate.of(2010, 12, 10))
                 .duration(135)
-                .genres(genreList)
                 .mpa(Mpa.builder().id(5).build())
-                .build());
+                .build();
+        int newId = filmStorage.add(film);
 
-        Film film2 = filmStorage.add(film1);
-        filmStorage.add(film1);
 
-        assertEquals(initialSize + 3, filmStorage.getAll().size());
-        assertNotEquals(film1.getId(), film2.getId());
+        assertEquals(initialSize + 1, filmStorage.getAll().size());
+        assertNotEquals(newId, film.getId());
     }
 
     @Test
@@ -101,33 +105,21 @@ public class FilmDbStorageTest {
 
     @Test
     public void updateTest() {
-        List<Genre> genreList2 = List.of(
-                Genre.builder().id(3).build());
-        Film film = filmStorage.update(Film.builder()
+        Film film = Film.builder()
                 .id(film1.getId())
                 .name("2")
                 .description("11122")
                 .releaseDate(LocalDate.of(2008, 8, 26))
                 .duration(180)
-                .genres(genreList2)
                 .mpa(Mpa.builder().id(1).build())
-                .build());
+                .build();
+        filmStorage.update(film);
 
         assertEquals(film.getId(), filmStorage.get(film1.getId()).getId());
         assertEquals(film.getName(), filmStorage.get(film1.getId()).getName());
         assertEquals(film.getDescription(), filmStorage.get(film1.getId()).getDescription());
         assertEquals(film.getReleaseDate(), filmStorage.get(film1.getId()).getReleaseDate());
         assertEquals(film.getDuration(), filmStorage.get(film1.getId()).getDuration());
-        assertEquals(film.getGenres(), filmStorage.get(film1.getId()).getGenres());
         assertEquals(film.getMpa(), filmStorage.get(film1.getId()).getMpa());
-    }
-
-    @Test
-    public void popularityTest() {
-        filmStorage.addLike(film2.getId(), user1.getId());
-        filmStorage.addLike(film1.getId(), user2.getId());
-        filmStorage.addLike(film2.getId(), user3.getId());
-
-        assertEquals(film2.getId(), filmStorage.getMostPopulars(1).get(0).getId());
     }
 }

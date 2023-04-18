@@ -9,8 +9,6 @@ public interface GenreStorage {
 
     List<Genre> getAll();
 
-    void addFilmGenre(int filmId, int genreId);
-
     List<Genre> getFilmGenres(int filmId);
 
     void removeAllFilmGenres();

@@ -49,16 +49,24 @@ public class UserDbStorageTest {
         List<Genre> genreList1 = List.of(
                 Genre.builder().id(2).build(),
                 Genre.builder().id(4).build());
-        film1 = filmStorage.add(Film.builder()
+        film1 = Film.builder()
                 .name("1")
                 .description("111")
                 .releaseDate(LocalDate.of(2010, 12, 10))
                 .duration(135)
                 .genres(genreList1)
                 .mpa(Mpa.builder().id(5).build())
-                .build());
-        film2 = filmStorage.add(film1);
-        film3 = filmStorage.add(film1);
+                .build();
+        int film1Id = filmStorage.add(film1);
+        int film2Id = filmStorage.add(film1);
+        int film3Id = filmStorage.add(film1);
+        film1.setId(film1Id);
+        film2 = film1.toBuilder()
+                .id(film2Id)
+                .build();
+        film2 = film1.toBuilder()
+                .id(film3Id)
+                .build();
     }
 
     @AfterEach
