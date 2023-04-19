@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
 public class FilmControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -30,7 +34,9 @@ public class FilmControllerTest {
                 .name("film1")
                 .description("filmDescription1")
                 .duration(100)
-                .releaseDate(LocalDate.of(2014,5,12))
+                .releaseDate(LocalDate.of(2014, 5, 12))
+                .genres(Collections.emptyList())
+                .mpa(Mpa.builder().id(2).build())
                 .build();
 
         mockMvc.perform(post("/films")
@@ -38,6 +44,7 @@ public class FilmControllerTest {
                         .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isOk());
     }
+
     @SneakyThrows
     @Test
     void addBlankNameFilm() {
@@ -45,7 +52,7 @@ public class FilmControllerTest {
                 .name(" ")
                 .description("filmDescription1")
                 .duration(100)
-                .releaseDate(LocalDate.of(2014,5,12))
+                .releaseDate(LocalDate.of(2014, 5, 12))
                 .build();
 
         mockMvc.perform(post("/films")
@@ -53,6 +60,7 @@ public class FilmControllerTest {
                         .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isBadRequest());
     }
+
     @SneakyThrows
     @Test
     void addExceededDescriptionFilm() {
@@ -60,7 +68,7 @@ public class FilmControllerTest {
                 .name("film1")
                 .description("A".repeat(201))
                 .duration(100)
-                .releaseDate(LocalDate.of(2014,5,12))
+                .releaseDate(LocalDate.of(2014, 5, 12))
                 .build();
 
         mockMvc.perform(post("/films")
@@ -68,15 +76,15 @@ public class FilmControllerTest {
                         .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isBadRequest());
     }
+
     @SneakyThrows
     @Test
-    void addInvalidReleaseDateFilm()
-    {
+    void addInvalidReleaseDateFilm() {
         Film film = Film.builder()
                 .name("film1")
                 .description("filmDescription1")
                 .duration(100)
-                .releaseDate(LocalDate.of(1895,12,27))
+                .releaseDate(LocalDate.of(1895, 12, 27))
                 .build();
 
         mockMvc.perform(post("/films")
@@ -84,6 +92,7 @@ public class FilmControllerTest {
                         .content(mapper.writeValueAsString(film)))
                 .andExpect(status().isBadRequest());
     }
+
     @SneakyThrows
     @Test
     void addNegativeDurationFilm() {
@@ -91,7 +100,7 @@ public class FilmControllerTest {
                 .name("film1")
                 .description("filmDescription1")
                 .duration(-100)
-                .releaseDate(LocalDate.of(2014,5,12))
+                .releaseDate(LocalDate.of(2014, 5, 12))
                 .build();
 
         mockMvc.perform(post("/films")

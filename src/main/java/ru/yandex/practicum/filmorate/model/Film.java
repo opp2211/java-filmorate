@@ -8,10 +8,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class Film {
     private int id;
@@ -23,5 +22,6 @@ public class Film {
     private LocalDate releaseDate;
     @Min(1)
     private int duration;
-    private final Set<Integer> userIdLikes = new HashSet<>();
+    private Mpa mpa;
+    private List<Genre> genres;
 }
