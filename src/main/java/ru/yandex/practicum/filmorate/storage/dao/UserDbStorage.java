@@ -127,6 +127,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getFriends(int userId) {
+        get(userId);
         String sql = "SELECT f.user_id, f.login, f.name, f.email, f.birthday " +
                 "FROM user_friend uf " +
                 "JOIN users f ON uf.friend_id = f.user_id " +
