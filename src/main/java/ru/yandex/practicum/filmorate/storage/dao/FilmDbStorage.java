@@ -108,6 +108,36 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
     }
 
+    @Override
+    public List<Film> getUsersRecommendations(int userId) {
+
+        String sqlGetFilmsByUsersSimilarLikes =
+                "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id " +
+                        "FROM film f " +
+                        "JOIN user_like_film ulf ON ulf.film_id = f.film_id " +
+                        "WHERE ulf.user_id IN " +
+                                                "( " +
+                                                "SELECT ufl1.user_id FROM user_like_film ufl1 " +
+                                                "WHERE ufl1.film_id IN " +
+                                                                        "( " +
+                                                                        "SELECT uf2.film_id FROM user_like_film uf2 " +
+                                                                        "WHERE uf2.user_id = ? " +
+                                                                        ") " +
+                                                "AND ufl1.user_id <> ? " +
+                                                "GROUP BY ufl1.user_id " +
+                                                "HAVING COUNT(ufl1.user_id) >= 1 " +
+                                                ") " +
+                        "AND f.film_id NOT IN " +
+                                                "( " +
+                                                "SELECT ufl2.film_id FROM user_like_film ufl2 " +
+                                                "WHERE ufl2.user_id = ? " +
+                                                ") " +
+                        "GROUP BY f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id " +
+                        "ORDER BY COUNT(ulf.user_id) DESC";
+
+        return jdbcTemplate.query(sqlGetFilmsByUsersSimilarLikes, this::mapRowToFilm, userId, userId, userId);
+    }
+
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
         return Film.builder()
                 .id(rs.getInt("film_id"))
