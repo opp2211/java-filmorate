@@ -30,8 +30,8 @@ public class FilmService {
         return get(newId);
     }
 
-    public void remove(int id) {
-        filmStorage.remove(id);
+    public void delete(int id) {
+        filmStorage.delete(id);
     }
 
     public Film update(Film film) {

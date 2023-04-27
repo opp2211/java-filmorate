@@ -92,7 +92,7 @@ public class UserDbStorageTest {
     public void removeTest() {
         int initialSize = userStorage.getAll().size();
 
-        userStorage.remove(user1.getId());
+        userStorage.delete(user1.getId());
 
         assertEquals(initialSize - 1, userStorage.getAll().size());
         assertEquals(0, userStorage.getAll().stream()

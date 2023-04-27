@@ -17,8 +17,8 @@ public class UserService {
         return userStorage.add(user);
     }
 
-    public void remove(int id) {
-        userStorage.remove(id);
+    public void delete(int id) {
+        userStorage.delete(id);
     }
 
     public User update(User user) {
@@ -49,5 +49,4 @@ public class UserService {
     public Collection<User> getMutualFriends(int userId, int friendId) {
         return userStorage.getMutualFriends(userId, friendId);
     }
-
 }

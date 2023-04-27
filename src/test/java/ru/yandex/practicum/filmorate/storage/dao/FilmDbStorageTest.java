@@ -97,7 +97,7 @@ public class FilmDbStorageTest {
     public void removeTest() {
         int initialSize = filmStorage.getAll().size();
 
-        filmStorage.remove(film1.getId());
+        filmStorage.delete(film1.getId());
 
         assertEquals(initialSize - 1, filmStorage.getAll().size());
         assertEquals(film2.getId(), filmStorage.get(film2.getId()).getId());
