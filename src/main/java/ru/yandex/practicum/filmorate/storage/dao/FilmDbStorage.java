@@ -4,11 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
-import javax.sql.DataSource;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,11 +20,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
 
     @Override
     public int add(Film film) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("film")
                 .usingGeneratedKeyColumns("film_id");
 
@@ -88,6 +87,25 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY COUNT(ulf.user_id) DESC " +
                 "LIMIT ?";
         return jdbcTemplate.query(sql, this::mapRowToFilm, count);
+    }
+
+    @Override
+    public List<Film> getByDirector(int directorId, String sortBy) {
+        String sort;
+        if (sortBy.equals("year"))
+            sort = "f.release_date ASC";
+        else if (sortBy.equals("likes"))
+            sort = "COUNT(uf.user_id) DESC";
+        else
+            throw new NotFoundException("Тип сортирорки " + sortBy + " не найден!");
+
+        String sql = "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id " +
+                "FROM film f " +
+                "JOIN film_director fd ON fd.film_id = f.film_id AND fd.director_id = ? " +
+                "LEFT JOIN user_like_film uf ON f.film_id = uf.film_id " +
+                "GROUP BY f.film_id " +
+                "ORDER BY " + sort;
+        return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
     }
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {

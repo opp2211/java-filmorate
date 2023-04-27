@@ -18,4 +18,6 @@ public interface FilmStorage {
     List<Film> getAll();
 
     List<Film> getMostPopulars(int count);
+
+    List<Film> getByDirector(int directorId, String sortBy);
 }
