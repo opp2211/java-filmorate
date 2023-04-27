@@ -21,6 +21,7 @@ public class FilmService {
     private final UserLikeFilmStorage userLikeFilmStorage;
     private final DirectorStorage directorStorage;
     private final FilmDirectorStorage filmDirectorStorage;
+    private final UserStorage userStorage;
 
     public Film add(Film film) {
         int newId = filmStorage.add(film);
@@ -81,6 +82,17 @@ public class FilmService {
         }
         List<Film> films = filmStorage.getByDirector(directorId, sortBy);
         films.forEach(this::buildFilm);
+        return films;
+    }
+
+    public List<Film> getUsersRecommendations(int userId) throws NotFoundException {
+
+        userStorage.get(userId);
+
+        List<Film> films = filmStorage.getUsersRecommendations(userId);
+
+        films.forEach(this::buildFilm);
+
         return films;
     }
 
