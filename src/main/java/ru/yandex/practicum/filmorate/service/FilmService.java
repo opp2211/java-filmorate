@@ -22,6 +22,8 @@ public class FilmService {
     private final DirectorStorage directorStorage;
     private final FilmDirectorStorage filmDirectorStorage;
 
+    private final FeedService feedService;
+
     public Film add(Film film) {
         int newId = filmStorage.add(film);
         film.setId(newId);
@@ -59,10 +61,12 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
+        feedService.addLikeEvent(userId, filmId);
         userLikeFilmStorage.addLike(filmId, userId);
     }
 
     public void removeLike(int filmId, int userId) {
+        feedService.removeLikeEvent(userId, filmId);
         userLikeFilmStorage.removeLike(filmId, userId);
     }
 
