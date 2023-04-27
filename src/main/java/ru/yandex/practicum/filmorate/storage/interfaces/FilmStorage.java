@@ -7,7 +7,7 @@ import java.util.List;
 public interface FilmStorage {
     int add(Film film);
 
-    void remove(int id);
+    void delete(int id);
 
     void removeAll();
 
