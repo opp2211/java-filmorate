@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserDbStorageTest {
 
+    private final UserService userService;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
 
@@ -42,9 +44,9 @@ public class UserDbStorageTest {
                 .email("fda@asdf.ry")
                 .birthday(LocalDate.of(1880, 6, 17))
                 .build();
-        user1 = userStorage.add(user);
-        user2 = userStorage.add(user);
-        user3 = userStorage.add(user);
+        user1 = userService.add(user);
+        user2 = userService.add(user);
+        user3 = userService.add(user);
 
         List<Genre> genreList1 = List.of(
                 Genre.builder().id(2).build(),
@@ -136,19 +138,19 @@ public class UserDbStorageTest {
                 .birthday(LocalDate.of(1980, 6, 15))
                 .build();
 
-        userStorage.add(user);
+        int newId = userStorage.add(user);
 
-        assertEquals(user.getId(), userStorage.get(user.getId()).getId());
-        assertEquals(user.getName(), userStorage.get(user.getId()).getName());
-        assertEquals(user.getLogin(), userStorage.get(user.getId()).getLogin());
-        assertEquals(user.getBirthday(), userStorage.get(user.getId()).getBirthday());
-        assertEquals(user.getEmail(), userStorage.get(user.getId()).getEmail());
+        assertEquals(newId, userStorage.get(newId).getId());
+        assertEquals(user.getName(), userStorage.get(newId).getName());
+        assertEquals(user.getLogin(), userStorage.get(newId).getLogin());
+        assertEquals(user.getBirthday(), userStorage.get(newId).getBirthday());
+        assertEquals(user.getEmail(), userStorage.get(newId).getEmail());
     }
 
     @Test
     public void addFriendTest() {
         int initialCount = userStorage.getFriends(user1.getId()).size();
-        userStorage.addFriend(user1.getId(), user2.getId());
+        userStorage.addFriend(user1.getId(), user2.getId(), false);
 
         assertEquals(initialCount + 1, userStorage.getFriends(user1.getId()).size());
     }
@@ -156,7 +158,7 @@ public class UserDbStorageTest {
     @Test
     public void removeFriendTest() {
         int initialCount = userStorage.getFriends(user1.getId()).size();
-        userStorage.addFriend(user1.getId(), user2.getId());
+        userStorage.addFriend(user1.getId(), user2.getId(), false);
         userStorage.removeFriend(user1.getId(), user2.getId());
 
         assertEquals(initialCount, userStorage.getFriends(user1.getId()).size());
@@ -165,8 +167,8 @@ public class UserDbStorageTest {
     @Test
     public void getMutualFriendsTest() {
         int initialCount = userStorage.getMutualFriends(user1.getId(), user2.getId()).size();
-        userStorage.addFriend(user1.getId(), user3.getId());
-        userStorage.addFriend(user2.getId(), user3.getId());
+        userStorage.addFriend(user1.getId(), user3.getId(), false);
+        userStorage.addFriend(user2.getId(), user3.getId(), false);
 
         assertEquals(initialCount + 1, userStorage.getMutualFriends(user1.getId(), user2.getId()).size());
     }
