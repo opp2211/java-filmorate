@@ -114,4 +114,10 @@ public class FilmService {
         film.setDirectors(directorStorage.getFilmDirectors(film.getId()));
         return film;
     }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        List<Film> films = filmStorage.getCommonFilms(userId, friendId);
+        films.forEach(this::buildFilm);
+        return films;
+    }
 }
