@@ -40,8 +40,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User get(@PathVariable int id) {
-        return userService.get(id);
+    public User get(@PathVariable("id") int userId) {
+        return userService.get(userId);
     }
 
     @DeleteMapping("/{userId}")
@@ -60,8 +60,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getFriends(@PathVariable int id) {
-        return userService.getFriends(id);
+    public List<User> getFriends(@PathVariable("id") int userId) {
+        return userService.getFriends(userId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
