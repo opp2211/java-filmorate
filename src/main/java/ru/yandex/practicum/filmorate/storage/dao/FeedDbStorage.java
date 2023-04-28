@@ -25,12 +25,14 @@ public class FeedDbStorage implements IFeedStorage {
 
     @Override
     public Event addEvent(Event event) {
-        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
+        SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("FEED")
+                .usingGeneratedKeyColumns("id");
+
         insert.execute(Map.of("timestamp", event.getEventTime(), "user_id", event.getUserId(),
                 "operation", event.getOperation(), "event_type", event.getEventType(),
                 "event_id", event.getEventId(), "entity_id", event.getEntityId()));
         int id = jdbcTemplate.query("SELECT COUNT(ID) FROM FEED",
-                (rs, rowNum) -> rs.getInt("count")).get(0);
+                (rs, rowNum) -> rs.getInt("COUNT(ID)")).get(0);
         event.setEventId(id);
         return event;
     }

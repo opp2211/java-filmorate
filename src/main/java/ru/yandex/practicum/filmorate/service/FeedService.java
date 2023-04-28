@@ -35,7 +35,7 @@ public class FeedService {
     }
 
     public Event addFriendEvent(int userId, int friendId) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Timestamp.from(Instant.now()),
                 userId,
                 EventType.FRIEND,
                 Operation.ADD,
@@ -44,7 +44,7 @@ public class FeedService {
     }
 
     public Event deleteFriendEvent(int userId, int friendId) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Timestamp.from(Instant.now()),
                 userId,
                 EventType.FRIEND,
                 Operation.REMOVE,
@@ -53,7 +53,7 @@ public class FeedService {
     }
 
     public Event addLikeEvent(int userId, int filmId) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Timestamp.from(Instant.now()),
                 userId,
                 EventType.LIKE,
                 Operation.ADD,
@@ -62,7 +62,7 @@ public class FeedService {
     }
 
     public Event removeLikeEvent(int userId, int filmId) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Timestamp.from(Instant.now()),
                 userId,
                 EventType.LIKE,
                 Operation.REMOVE,
