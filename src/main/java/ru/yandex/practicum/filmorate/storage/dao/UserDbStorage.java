@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
-import javax.sql.DataSource;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,11 +18,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final DataSource dataSource;
 
     @Override
-    public User add(User user) {
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
+    public int add(User user) {
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("user_id");
 
@@ -33,14 +30,11 @@ public class UserDbStorage implements UserStorage {
         parameters.put("name", user.getName());
         parameters.put("email", user.getEmail());
         parameters.put("birthday", Date.valueOf(user.getBirthday()));
-        Number newId = simpleJdbcInsert.executeAndReturnKey(parameters);
-        user.setId(newId.intValue());
-        return get(user.getId());
+        return simpleJdbcInsert.executeAndReturnKey(parameters).intValue();
     }
 
     @Override
     public void delete(int id) {
-        get(id);
         String sql = "DELETE FROM users WHERE user_id = ?";
         jdbcTemplate.update(sql, id);
     }
@@ -52,12 +46,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User update(User user) {
-        try {
-            get(user.getId());
-        } catch (Exception e) {
-            throw new NotFoundException("Пользователь с id = " + user.getId() + " не найден!");
-        }
+    public void update(User user) {
         String sql = "UPDATE users SET " +
                 "login = ?, name = ?, email = ?, birthday = ? " +
                 "WHERE user_id = ?";
@@ -67,18 +56,13 @@ public class UserDbStorage implements UserStorage {
                 user.getEmail(),
                 user.getBirthday(),
                 user.getId());
-        return get(user.getId());
     }
 
     @Override
     public User get(int id) {
-        try {
-            String sql = "SELECT user_id, login, name, email, birthday " +
-                    "FROM users WHERE user_id = ?";
-            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id);
-        } catch (Exception e) {
-            throw new NotFoundException("Пользователь с id = " + id + " не найден!");
-        }
+        String sql = "SELECT user_id, login, name, email, birthday " +
+                "FROM users WHERE user_id = ?";
+        return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id);
     }
 
     @Override
@@ -89,29 +73,22 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(int userId, int friendId) {
-        boolean isAccepted = false;
-
-        get(userId);
-        get(friendId); // Проверка наличия пользователей в базе
-        if (hasFriendship(friendId, userId)) {
-            isAccepted = true;
-            updateFriendship(friendId, userId, true);
-        }
-
+    public void addFriend(int userId, int friendId, boolean isAccepted) {
         String sql = "INSERT INTO user_friend (user_id, friend_id, is_accepted) " +
                 "VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, userId, friendId, isAccepted);
     }
 
-    private boolean hasFriendship(int userId, int friendId) {
+    @Override
+    public boolean hasFriendship(int userId, int friendId) {
         String sql = "SELECT count(*) FROM user_friend WHERE user_id = ? AND friend_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> rs.getInt(1), userId, friendId);
 
         return count != null && count > 0;
     }
 
-    private void updateFriendship(int userId, int friendId, boolean isAccepted) {
+    @Override
+    public void updateFriendship(int userId, int friendId, boolean isAccepted) {
         String sql = "UPDATE user_friend SET " +
                 "is_accepted = ? " +
                 "WHERE user_id = ? AND friend_id = ? ";
@@ -122,12 +99,10 @@ public class UserDbStorage implements UserStorage {
     public void removeFriend(int userId, int friendId) {
         String sql = "DELETE FROM user_friend WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sql, userId, friendId);
-        updateFriendship(friendId, userId, false);
     }
 
     @Override
     public List<User> getFriends(int userId) {
-        get(userId);
         String sql = "SELECT f.user_id, f.login, f.name, f.email, f.birthday " +
                 "FROM user_friend uf " +
                 "JOIN users f ON uf.friend_id = f.user_id " +

@@ -31,6 +31,7 @@ public class FilmService {
     }
 
     public void delete(int id) {
+        get(id);
         filmStorage.delete(id);
     }
 
