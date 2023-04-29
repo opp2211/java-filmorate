@@ -30,13 +30,11 @@ public class ReviewDbStorage {
 
     public boolean update(Review review) {
         String sql = "UPDATE review " +
-                "SET content = ?, is_positive = ?, user_id = ?, film_id = ? " +
+                "SET content = ?, is_positive = ? " +
                 "WHERE review_id = ?";
         int rowAffected = jdbcTemplate.update(sql,
                 review.getContent(),
                 review.getIsPositive(),
-                review.getUserId(),
-                review.getFilmId(),
                 review.getReviewId());
         return rowAffected > 0;
     }

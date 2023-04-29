@@ -37,8 +37,6 @@ public class ReviewService {
 
     public Review update(Review review) {
         validateFields(review);
-        userService.get(review.getUserId());
-        filmService.get(review.getFilmId());
 
         if (!reviewStorage.update(review))
             throw new NotFoundException("Отзыв с id = " + review.getReviewId() + " не найден!");
