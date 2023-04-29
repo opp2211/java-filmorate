@@ -48,15 +48,10 @@ public class ReviewService {
         reviewStorage.delete(id);
     }
 
-    public List<Review> getReviews(String strFilmId, int count) {
-        Integer intFilmId;
-        if (strFilmId.equals("null")) {
-            intFilmId = null;
-        } else {
-            intFilmId = Integer.parseInt(strFilmId);
-            filmService.get(intFilmId);
-        }
-        return reviewStorage.getReviews(intFilmId, count);
+    public List<Review> getReviews(Integer filmId, int count) {
+        if (filmId != null)
+            filmService.get(filmId);
+        return reviewStorage.getReviews(filmId, count);
     }
 
     public void addLike(int id, int userId) {
