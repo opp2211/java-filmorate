@@ -21,7 +21,7 @@ public class FilmService {
     private final UserLikeFilmStorage userLikeFilmStorage;
     private final DirectorStorage directorStorage;
     private final FilmDirectorStorage filmDirectorStorage;
-    private final UserStorage userStorage;
+    private final UserService userService;
 
     public Film add(Film film) {
         int newId = filmStorage.add(film);
@@ -86,13 +86,31 @@ public class FilmService {
     }
 
     public List<Film> getUsersRecommendations(int userId) throws NotFoundException {
-
-        userStorage.get(userId);
-
+        userService.get(userId);
         List<Film> films = filmStorage.getUsersRecommendations(userId);
-
         films.forEach(this::buildFilm);
+        return films;
+    }
 
+    public List<Film> search(String query, String by) {
+        List<Film> films;
+        String queryAddSymbols = "%" + query + "%";
+        if (by.equals("director")) {
+            films = filmStorage.findByDirector(queryAddSymbols);
+        } else if (by.equals("title")) {
+            films = filmStorage.findByName(queryAddSymbols);
+        } else if (by.equals("director,title") || by.equals("title,director")) {
+            films = filmStorage.findByDirectorAndName(queryAddSymbols);
+        }  else throw new IllegalStateException("Поиск по параметру " + by + " не предусмотрен");
+        films.forEach(this::buildFilm);
+        return films;
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendId) throws NotFoundException {
+        userService.get(userId);//Валидация id
+        userService.get(friendId);//Валидация id
+        List<Film> films = filmStorage.getCommonFilms(userId, friendId);
+        films.forEach(this::buildFilm);
         return films;
     }
 
@@ -125,11 +143,5 @@ public class FilmService {
         film.setGenres(genreStorage.getFilmGenres(film.getId()));
         film.setDirectors(directorStorage.getFilmDirectors(film.getId()));
         return film;
-    }
-
-    public List<Film> getCommonFilms(int userId, int friendId) {
-        List<Film> films = filmStorage.getCommonFilms(userId, friendId);
-        films.forEach(this::buildFilm);
-        return films;
     }
 }
