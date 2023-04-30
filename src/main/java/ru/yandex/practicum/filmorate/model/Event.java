@@ -11,8 +11,6 @@ import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.Operation;
 
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
-import java.time.LocalDate;
 
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor(staticName = "create")
