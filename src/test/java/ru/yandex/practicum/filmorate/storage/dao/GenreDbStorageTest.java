@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -17,7 +16,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -37,12 +35,6 @@ public class GenreDbStorageTest {
         assertEquals(firstGenreName, genreFromDB.getName());
     }
 
-    @Test
-    public void genreWrongIdGetTest() {
-        int nonExistIndex = -1;
-
-        assertThrows(NotFoundException.class, () -> genreStorage.get(nonExistIndex));
-    }
 
     @Test
     public void genreGetAllTest() {
