@@ -104,7 +104,7 @@ public class FilmDbStorage implements FilmStorage {
                 "JOIN film_director fd ON fd.film_id = f.film_id AND fd.director_id = ? " +
                 "LEFT JOIN user_like_film uf ON f.film_id = uf.film_id " +
                 "GROUP BY f.film_id " +
-                "ORDER BY "+sort;
+                "ORDER BY " + sort;
         return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
     }
 
