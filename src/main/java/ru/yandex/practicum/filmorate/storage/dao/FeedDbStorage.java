@@ -6,8 +6,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.Operation;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.IFeedStorage;
 
 import java.sql.ResultSet;
@@ -26,7 +26,7 @@ public class FeedDbStorage implements IFeedStorage {
     }
 
     @Override
-    public Event addEvent(Event event) {
+    public void addEvent(Event event) {
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("FEED")
                 .usingGeneratedKeyColumns("id");
 
@@ -36,7 +36,6 @@ public class FeedDbStorage implements IFeedStorage {
         int id = jdbcTemplate.query("SELECT COUNT(ID) FROM FEED",
                 (rs, rowNum) -> rs.getInt("COUNT(ID)")).get(0);
         event.setEventId(id);
-        return event;
     }
 
     @Override
@@ -46,7 +45,8 @@ public class FeedDbStorage implements IFeedStorage {
     }
 
     @Override
-    public List<Event> getUserEvents(int userId) {
+    public List<Event> getUserEvents(User user) {
+        int userId = user.getId();
         String sql = "SELECT * FROM FEED WHERE USER_ID = ?";
         List<Event> result = jdbcTemplate.query(sql, this::mapRowToEvent, userId);
         return result.size() >= 1 ? result : new ArrayList<>();
@@ -56,7 +56,7 @@ public class FeedDbStorage implements IFeedStorage {
     public Event mapRowToEvent(ResultSet rs, int rowNum) throws SQLException {
         EventType type = EventType.valueOf(rs.getString("event_type"));
         Operation operation = Operation.valueOf(rs.getString("operation"));
-        Event event = Event.create(rs.getTimestamp("timestamp"),
+        Event event = Event.create(rs.getLong("timestamp"),
                 rs.getInt("user_id"), type, operation,
                 rs.getInt("entity_id"));
         event.setEventId(rs.getInt("id"));

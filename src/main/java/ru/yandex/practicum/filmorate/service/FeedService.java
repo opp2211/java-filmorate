@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.Operation;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.FeedDbStorage;
 
 import java.sql.Timestamp;
@@ -24,20 +25,12 @@ public class FeedService {
         this.feedStorage = feedStorage;
     }
 
-    public void addEvent(Event event) {
-        feedStorage.addEvent(event);
-    }
-
-    public Event getEvent(int id) {
-        return feedStorage.getEvent(id);
-    }
-
-    public List<Event> getUserEvents(int userId) {
-        return feedStorage.getUserEvents(userId);
+    public List<Event> getUserEvents(User user) {
+        return feedStorage.getUserEvents(user);
     }
 
     public void addFriendEvent(int userId, int friendId) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Instant.now().toEpochMilli(),
                 userId,
                 EventType.FRIEND,
                 Operation.ADD,
@@ -46,7 +39,7 @@ public class FeedService {
     }
 
     public void deleteFriendEvent(int userId, int friendId) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Instant.now().toEpochMilli(),
                 userId,
                 EventType.FRIEND,
                 Operation.REMOVE,
@@ -55,7 +48,7 @@ public class FeedService {
     }
 
     public void addLikeEvent(int userId, int filmId) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Instant.now().toEpochMilli(),
                 userId,
                 EventType.LIKE,
                 Operation.ADD,
@@ -64,7 +57,7 @@ public class FeedService {
     }
 
     public void removeLikeEvent(int userId, int filmId) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Instant.now().toEpochMilli(),
                 userId,
                 EventType.LIKE,
                 Operation.REMOVE,
@@ -73,29 +66,29 @@ public class FeedService {
     }
 
     public void addReviewEvent(Review review) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Instant.now().toEpochMilli(),
                 review.getUserId(),
                 EventType.REVIEW,
                 Operation.ADD,
-                review.getFilmId());
+                review.getReviewId());
         feedStorage.addEvent(event);
     }
 
     public void removeReviewEvent(Review review) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Instant.now().toEpochMilli(),
                 review.getUserId(),
                 EventType.REVIEW,
                 Operation.REMOVE,
-                review.getFilmId());
+                review.getReviewId());
         feedStorage.addEvent(event);
     }
 
     public void updateReviewEvent(Review review) {
-        Event event = Event.create(Timestamp.from(Instant.EPOCH),
+        Event event = Event.create(Instant.now().toEpochMilli(),
                 review.getUserId(),
                 EventType.REVIEW,
                 Operation.UPDATE,
-                review.getFilmId());
+                review.getReviewId());
         feedStorage.addEvent(event);
     }
 }

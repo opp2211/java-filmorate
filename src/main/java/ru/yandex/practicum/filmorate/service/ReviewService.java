@@ -23,8 +23,8 @@ public class ReviewService {
         validateFields(review);
         userService.get(review.getUserId());
         filmService.get(review.getFilmId());
-        feedService.addReviewEvent(review);
         review.setReviewId(reviewStorage.add(review));
+        feedService.addReviewEvent(review);
         return review;
     }
 

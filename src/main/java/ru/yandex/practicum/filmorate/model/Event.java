@@ -23,7 +23,7 @@ public class Event {
     @EqualsAndHashCode.Exclude
     @NonFinal
     int eventId;
-    Timestamp timestamp;
+    Long timestamp;
     @NotNull
     int userId;
     EventType eventType;
