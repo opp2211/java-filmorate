@@ -21,6 +21,7 @@ public class FilmService {
     private final UserLikeFilmStorage userLikeFilmStorage;
     private final DirectorStorage directorStorage;
     private final FilmDirectorStorage filmDirectorStorage;
+    private final UserStorage userStorage;
 
     private final FeedService feedService;
 
@@ -32,8 +33,9 @@ public class FilmService {
         return get(newId);
     }
 
-    public void remove(int id) {
-        filmStorage.remove(id);
+    public void delete(int id) {
+        get(id);
+        filmStorage.delete(id);
     }
 
     public Film update(Film film) {
@@ -87,6 +89,17 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getUsersRecommendations(int userId) throws NotFoundException {
+
+        userStorage.get(userId);
+
+        List<Film> films = filmStorage.getUsersRecommendations(userId);
+
+        films.forEach(this::buildFilm);
+
+        return films;
+    }
+
     private void updateGenres(Film film) {
         filmGenreStorage.removeFilmGenre(film.getId());
         if (film.getGenres() != null && film.getGenres().size() > 0) {
@@ -116,5 +129,11 @@ public class FilmService {
         film.setGenres(genreStorage.getFilmGenres(film.getId()));
         film.setDirectors(directorStorage.getFilmDirectors(film.getId()));
         return film;
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        List<Film> films = filmStorage.getCommonFilms(userId, friendId);
+        films.forEach(this::buildFilm);
+        return films;
     }
 }

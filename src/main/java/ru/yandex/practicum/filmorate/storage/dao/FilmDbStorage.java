@@ -38,7 +38,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void remove(int id) {
+    public void delete(int id) {
         String sql = "DELETE FROM film WHERE film_id = ?";
         jdbcTemplate.update(sql, id);
     }
@@ -106,6 +106,51 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY f.film_id " +
                 "ORDER BY " + sort;
         return jdbcTemplate.query(sql, this::mapRowToFilm, directorId);
+    }
+
+    @Override
+    public List<Film> getUsersRecommendations(int userId) {
+
+        final String sqlGetFilmsByUsersWithSimilarLikes =
+                "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id " +
+                        "FROM film f " +
+                        "JOIN user_like_film ulf ON ulf.film_id = f.film_id " +
+                        "AND ulf.user_id IN " +
+                                                "( " +
+                                                "SELECT ufl1.user_id " +
+                                                "FROM user_like_film ufl1 " +
+                                                "WHERE ufl1.film_id IN " +
+                                                                        "( " +
+                                                                        "SELECT ulf2.film_id " +
+                                                                        "FROM user_like_film ulf2 " +
+                                                                        "WHERE ulf2.user_id = ? " +
+                                                                        ") " +
+                                                "AND ufl1.user_id <> ? " +
+                                                "GROUP BY ufl1.user_id " +
+                                                "HAVING COUNT(ufl1.user_id) >= 1 " +
+                                                ") " +
+                        "AND f.film_id NOT IN " +
+                                                "( " +
+                                                "SELECT ufl3.film_id " +
+                                                "FROM user_like_film ufl3 " +
+                                                "WHERE ufl3.user_id = ? " +
+                                                ") " +
+                        "GROUP BY f.film_id " +
+                        "ORDER BY COUNT(ulf.user_id) DESC";
+
+        return jdbcTemplate.query(sqlGetFilmsByUsersWithSimilarLikes, this::mapRowToFilm, userId, userId, userId);
+    }
+
+    @Override
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        String sql = "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id, COUNT(ulf1.user_id) " +
+                "FROM film f JOIN user_like_film ulf ON f.film_id = ulf.film_id " +
+                "AND ulf.user_id = " + userId + " AND f.film_id in " +
+                "(SELECT film_id from user_like_film WHERE user_id =" + friendId + ") " +
+                "JOIN user_like_film ulf1 ON f.film_id = ulf1.film_id " +
+                "GROUP BY f.film_id " +
+                "ORDER BY COUNT(ulf1.user_id) DESC;";
+        return jdbcTemplate.query(sql, this::mapRowToFilm);
     }
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
