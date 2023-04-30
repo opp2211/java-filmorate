@@ -52,8 +52,10 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getMostPopulars(@RequestParam(defaultValue = "10") int count) {
-        return filmService.getMostPopulars(count);
+    public List<Film> getMostPopulars(@RequestParam(defaultValue = "10") int count,
+                                      @RequestParam(required = false) Integer genreId,
+                                      @RequestParam(required = false) Integer year) {
+        return filmService.getMostPopulars(count, genreId, year);
     }
 
     @GetMapping("/director/{directorId}")  // GET /films/director/{directorId}?sortBy=[year,likes]

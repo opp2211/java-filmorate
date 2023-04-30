@@ -23,6 +23,8 @@ public class FilmService {
     private final FilmDirectorStorage filmDirectorStorage;
     private final UserStorage userStorage;
 
+    private final GenreService genreService;
+
     public Film add(Film film) {
         int newId = filmStorage.add(film);
         film.setId(newId);
@@ -68,8 +70,9 @@ public class FilmService {
         userLikeFilmStorage.removeLike(filmId, userId);
     }
 
-    public List<Film> getMostPopulars(int count) {
-        List<Film> films = filmStorage.getMostPopulars(count);
+    public List<Film> getMostPopulars(int count, Integer genreId, Integer year) {
+        genreService.get(genreId);
+        List<Film> films = filmStorage.getMostPopulars(count, genreId, year);
         films.forEach(this::buildFilm);
         return films;
     }
