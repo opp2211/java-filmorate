@@ -71,7 +71,8 @@ public class FilmService {
     }
 
     public List<Film> getMostPopulars(int count, Integer genreId, Integer year) {
-        genreService.get(genreId);
+        if (genreId != null)
+            genreService.get(genreId);
         List<Film> films = filmStorage.getMostPopulars(count, genreId, year);
         films.forEach(this::buildFilm);
         return films;
