@@ -6,11 +6,13 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.Operation;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.storage.interfaces.IFeedStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +30,7 @@ public class FeedDbStorage implements IFeedStorage {
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("FEED")
                 .usingGeneratedKeyColumns("id");
 
-        insert.execute(Map.of("timestamp", event.getEventTime(), "user_id", event.getUserId(),
+        insert.execute(Map.of("timestamp", event.getTimestamp(), "user_id", event.getUserId(),
                 "operation", event.getOperation(), "event_type", event.getEventType(),
                 "event_id", event.getEventId(), "entity_id", event.getEntityId()));
         int id = jdbcTemplate.query("SELECT COUNT(ID) FROM FEED",
@@ -46,7 +48,8 @@ public class FeedDbStorage implements IFeedStorage {
     @Override
     public List<Event> getUserEvents(int userId) {
         String sql = "SELECT * FROM FEED WHERE USER_ID = ?";
-        return jdbcTemplate.query(sql, this::mapRowToEvent, userId);
+        List<Event> result = jdbcTemplate.query(sql, this::mapRowToEvent, userId);
+        return result.size() >= 1 ? result : new ArrayList<>();
     }
 
     @Override

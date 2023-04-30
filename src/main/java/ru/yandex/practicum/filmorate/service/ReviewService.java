@@ -17,12 +17,13 @@ public class ReviewService {
     private final ReviewDbStorage reviewStorage;
     private final UserService userService;
     private final FilmService filmService;
+    private final FeedService feedService;
 
     public Review add(Review review) {
         validateFields(review);
         userService.get(review.getUserId());
         filmService.get(review.getFilmId());
-
+        feedService.addReviewEvent(review);
         review.setReviewId(reviewStorage.add(review));
         return review;
     }
@@ -40,11 +41,13 @@ public class ReviewService {
 
         if (!reviewStorage.update(review))
             throw new NotFoundException("Отзыв с id = " + review.getReviewId() + " не найден!");
+        feedService.updateReviewEvent(get(review.getReviewId()));
         return get(review.getReviewId());
     }
 
     public void delete(int id) {
-        get(id);
+        Review review = get(id);
+        feedService.removeReviewEvent(review);
         reviewStorage.delete(id);
     }
 

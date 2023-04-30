@@ -68,8 +68,8 @@ public class FilmService {
     }
 
     public void removeLike(int filmId, int userId) {
-        feedService.removeLikeEvent(userId, filmId);
         userLikeFilmStorage.removeLike(filmId, userId);
+        feedService.removeLikeEvent(userId, filmId);
     }
 
     public List<Film> getMostPopulars(int count) {

@@ -14,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
+    private final FeedService feedService;
 
     public User add(User user) {
         int newId = userStorage.add(user);
@@ -53,11 +54,13 @@ public class UserService {
             userStorage.updateFriendship(friendId, userId, true);
         }
         userStorage.addFriend(userId, friendId, isAccepted);
+        feedService.addFriendEvent(userId, friendId);
     }
 
     public void removeUserFriend(int userId, int friendId) {
         userStorage.removeFriend(userId, friendId);
         userStorage.updateFriendship(friendId, userId, false);
+        feedService.deleteFriendEvent(userId, friendId);
     }
 
     public List<User> getFriends(int userId) {
