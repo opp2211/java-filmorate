@@ -63,8 +63,8 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        feedService.addLikeEvent(userId, filmId);
         userLikeFilmStorage.addLike(filmId, userId);
+        feedService.addLikeEvent(userId, filmId);
     }
 
     public void removeLike(int filmId, int userId) {

@@ -41,8 +41,9 @@ public class ReviewService {
 
         if (!reviewStorage.update(review))
             throw new NotFoundException("Отзыв с id = " + review.getReviewId() + " не найден!");
-        feedService.updateReviewEvent(get(review.getReviewId()));
-        return get(review.getReviewId());
+        Review returnReview = get(review.getReviewId());
+        feedService.updateReviewEvent(returnReview);
+        return returnReview;
     }
 
     public void delete(int id) {

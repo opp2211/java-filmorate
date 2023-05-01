@@ -17,7 +17,6 @@ import javax.validation.constraints.NotNull;
 @Data
 public class Event {
     @NotNull
-    @NotNull
     @EqualsAndHashCode.Exclude
     @NonFinal
     int eventId;

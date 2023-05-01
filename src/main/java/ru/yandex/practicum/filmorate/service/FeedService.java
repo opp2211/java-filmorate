@@ -1,13 +1,16 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.Operation;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.dao.FeedDbStorage;
+import ru.yandex.practicum.filmorate.storage.dao.UserDbStorage;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,14 +19,21 @@ import java.util.List;
 public class FeedService {
 
     private final FeedDbStorage feedStorage;
+    private final UserDbStorage userDbStorage;
 
     @Autowired
-    public FeedService(FeedDbStorage feedStorage) {
+    public FeedService(FeedDbStorage feedStorage, UserDbStorage userDbStorage) {
         this.feedStorage = feedStorage;
+        this.userDbStorage = userDbStorage;
     }
 
-    public List<Event> getUserEvents(User user) {
-        return feedStorage.getUserEvents(user);
+    public List<Event> getUserEvents(int id) {
+        try {
+            User user = userDbStorage.get(id);
+            return feedStorage.getUserEvents(user);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException(String.format("Пользователь c ID=%s не найден", id));
+        }
     }
 
     public void addFriendEvent(int userId, int friendId) {

@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.interfaces.IFeedStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,12 +28,9 @@ public class FeedDbStorage implements IFeedStorage {
     public void addEvent(Event event) {
         SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate).withTableName("FEED")
                 .usingGeneratedKeyColumns("id");
-
-        insert.execute(Map.of("timestamp", event.getTimestamp(), "user_id", event.getUserId(),
+        int id = (int) insert.executeAndReturnKey(Map.of("timestamp", event.getTimestamp(), "user_id", event.getUserId(),
                 "operation", event.getOperation(), "event_type", event.getEventType(),
                 "event_id", event.getEventId(), "entity_id", event.getEntityId()));
-        int id = jdbcTemplate.query("SELECT COUNT(ID) FROM FEED",
-                (rs, rowNum) -> rs.getInt("COUNT(ID)")).get(0);
         event.setEventId(id);
     }
 
@@ -48,8 +44,7 @@ public class FeedDbStorage implements IFeedStorage {
     public List<Event> getUserEvents(User user) {
         int userId = user.getId();
         String sql = "SELECT * FROM FEED WHERE USER_ID = ?";
-        List<Event> result = jdbcTemplate.query(sql, this::mapRowToEvent, userId);
-        return result.size() >= 1 ? result : new ArrayList<>();
+        return jdbcTemplate.query(sql, this::mapRowToEvent, userId);
     }
 
     @Override
