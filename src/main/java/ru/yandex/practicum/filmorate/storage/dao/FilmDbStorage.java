@@ -116,25 +116,25 @@ public class FilmDbStorage implements FilmStorage {
                         "FROM film f " +
                         "JOIN user_like_film ulf ON ulf.film_id = f.film_id " +
                         "AND ulf.user_id IN " +
-                                                "( " +
-                                                "SELECT ufl1.user_id " +
-                                                "FROM user_like_film ufl1 " +
-                                                "WHERE ufl1.film_id IN " +
-                                                                        "( " +
-                                                                        "SELECT ulf2.film_id " +
-                                                                        "FROM user_like_film ulf2 " +
-                                                                        "WHERE ulf2.user_id = ? " +
-                                                                        ") " +
-                                                "AND ufl1.user_id <> ? " +
-                                                "GROUP BY ufl1.user_id " +
-                                                "HAVING COUNT(ufl1.user_id) >= 1 " +
-                                                ") " +
+                        "( " +
+                        "SELECT ufl1.user_id " +
+                        "FROM user_like_film ufl1 " +
+                        "WHERE ufl1.film_id IN " +
+                        "( " +
+                        "SELECT ulf2.film_id " +
+                        "FROM user_like_film ulf2 " +
+                        "WHERE ulf2.user_id = ? " +
+                        ") " +
+                        "AND ufl1.user_id <> ? " +
+                        "GROUP BY ufl1.user_id " +
+                        "HAVING COUNT(ufl1.user_id) >= 1 " +
+                        ") " +
                         "AND f.film_id NOT IN " +
-                                                "( " +
-                                                "SELECT ufl3.film_id " +
-                                                "FROM user_like_film ufl3 " +
-                                                "WHERE ufl3.user_id = ? " +
-                                                ") " +
+                        "( " +
+                        "SELECT ufl3.film_id " +
+                        "FROM user_like_film ufl3 " +
+                        "WHERE ufl3.user_id = ? " +
+                        ") " +
                         "GROUP BY f.film_id " +
                         "ORDER BY COUNT(ulf.user_id) DESC";
 
@@ -145,12 +145,47 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getCommonFilms(int userId, int friendId) {
         String sql = "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id, COUNT(ulf1.user_id) " +
                 "FROM film f JOIN user_like_film ulf ON f.film_id = ulf.film_id " +
-                "AND ulf.user_id = " + userId + " AND f.film_id in " +
-                "(SELECT film_id from user_like_film WHERE user_id =" + friendId + ") " +
+                "AND ulf.user_id = ? AND f.film_id in " +
+                "(SELECT film_id from user_like_film WHERE user_id = ?) " +
                 "JOIN user_like_film ulf1 ON f.film_id = ulf1.film_id " +
                 "GROUP BY f.film_id " +
-                "ORDER BY COUNT(ulf1.user_id) DESC;";
-        return jdbcTemplate.query(sql, this::mapRowToFilm);
+                "ORDER BY COUNT(ulf1.user_id) DESC";
+        return jdbcTemplate.query(sql, this::mapRowToFilm, userId, friendId);
+    }
+
+    @Override
+    public List<Film> findByDirectorAndName(String query) {
+        String sql = "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id " +
+                "FROM film f LEFT JOIN user_like_film ulf on f.film_id = ulf.film_id " +
+                "    LEFT JOIN film_director fd on f.film_id = fd.film_id " +
+                " JOIN director d on fd.director_id = d.director_id and LOWER (d.name) LIKE LOWER(?) " +
+                "OR LOWER(f.title) LIKE LOWER(?) " +
+                "GROUP BY f.film_id, d.name " +
+                "ORDER BY COUNT(ulf.user_id) DESC";
+
+        return jdbcTemplate.query(sql, this::mapRowToFilm, query, query);
+    }
+
+    @Override
+    public List<Film> findByDirector(String query) {
+        String sql = "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id " +
+                "FROM film f LEFT JOIN user_like_film ulf on f.film_id = ulf.film_id " +
+                "LEFT JOIN film_director fd on f.film_id = fd.film_id " +
+                "JOIN director d on fd.director_id = d.director_id and LOWER (d.name) LIKE LOWER(?) " +
+                "GROUP BY f.film_id, d.name " +
+                "ORDER BY COUNT(ulf.user_id) DESC";
+
+        return jdbcTemplate.query(sql, this::mapRowToFilm, query);
+    }
+
+    @Override
+    public List<Film> findByName(String query) {
+        String sql = "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id " +
+                "FROM film f LEFT JOIN user_like_film ULF on f.film_id = ULF.film_id where LOWER (f.title) LIKE LOWER (?) " +
+                "GROUP BY f.film_id " +
+                "ORDER BY COUNT(ulf.user_id) DESC";
+
+        return jdbcTemplate.query(sql, this::mapRowToFilm, query);
     }
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
