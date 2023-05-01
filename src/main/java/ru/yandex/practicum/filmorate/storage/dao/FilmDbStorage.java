@@ -79,10 +79,16 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getMostPopulars(int count) {
+    public List<Film> getMostPopulars(int count, Integer genreId, Integer year) {
         String sql = "SELECT f.film_id, f.title, f.description, f.release_date, f.duration, f.mpa_id " +
                 "FROM film f " +
                 "LEFT JOIN user_like_film ulf ON f.film_id = ulf.film_id " +
+                (genreId != null ?
+                        "JOIN film_genre fg ON f.film_id = fg.film_id AND fg.genre_id = " + genreId + " " :
+                        "") +
+                (year != null ?
+                        "WHERE EXTRACT(YEAR FROM f.release_date) = " + year + " " :
+                        "") +
                 "GROUP BY f.film_id " +
                 "ORDER BY COUNT(ulf.user_id) DESC " +
                 "LIMIT ?";
