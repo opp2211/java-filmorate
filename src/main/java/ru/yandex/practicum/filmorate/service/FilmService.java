@@ -25,6 +25,8 @@ public class FilmService {
 
     private final GenreService genreService;
 
+    private final FeedService feedService;
+
     public Film add(Film film) {
         int newId = filmStorage.add(film);
         film.setId(newId);
@@ -64,10 +66,12 @@ public class FilmService {
 
     public void addLike(int filmId, int userId) {
         userLikeFilmStorage.addLike(filmId, userId);
+        feedService.addLikeEvent(userId, filmId);
     }
 
     public void removeLike(int filmId, int userId) {
         userLikeFilmStorage.removeLike(filmId, userId);
+        feedService.removeLikeEvent(userId, filmId);
     }
 
     public List<Film> getMostPopulars(int count, Integer genreId, Integer year) {
