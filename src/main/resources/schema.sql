@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS user_friend (
 );
 CREATE TABLE IF NOT EXISTS user_like_film (
 	film_id int REFERENCES film ON DELETE CASCADE,
-	user_id int REFERENCES users ON DELETE CASCADE,
+	user_id int REFERENCES users ON DELETE CASCADE
 	--PRIMARY KEY (film_id, user_id) Костыль, чтобы пройти тесты постман
 );
 CREATE TABLE IF NOT EXISTS review(
