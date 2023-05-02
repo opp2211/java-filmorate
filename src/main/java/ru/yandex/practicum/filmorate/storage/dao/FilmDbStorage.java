@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -50,25 +51,28 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public boolean update(Film film) {
+    public void update(Film film) {
         String sql = "UPDATE film SET " +
                 "title = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? " +
                 "WHERE film_id = ?";
-        int rowAffected = jdbcTemplate.update(sql,
+        jdbcTemplate.update(sql,
                 film.getName(),
                 film.getDescription(),
                 Date.valueOf(film.getReleaseDate()),
                 film.getDuration(),
                 film.getMpa().getId(),
                 film.getId());
-        return rowAffected > 0;
     }
 
     @Override
     public Film get(int id) {
-        String sql = "SELECT film_id, title, description, release_date, duration, mpa_id " +
-                "FROM film WHERE film_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id);
+        try {
+            String sql = "SELECT film_id, title, description, release_date, duration, mpa_id " +
+                    "FROM film WHERE film_id = ?";
+            return jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Фильм с id = " + id + " не найден!");
+        }
     }
 
     @Override

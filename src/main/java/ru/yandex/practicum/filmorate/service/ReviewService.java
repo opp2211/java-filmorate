@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.dao.ReviewDbStorage;
@@ -29,18 +27,13 @@ public class ReviewService {
     }
 
     public Review get(int id) {
-        try {
-            return reviewStorage.get(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Отзыв с id = " + id + " не найден!");
-        }
+        return reviewStorage.get(id);
     }
 
     public Review update(Review review) {
         validateFields(review);
-
-        if (!reviewStorage.update(review))
-            throw new NotFoundException("Отзыв с id = " + review.getReviewId() + " не найден!");
+        get(review.getReviewId());
+        reviewStorage.update(review);
         Review returnReview = get(review.getReviewId());
         feedService.updateReviewEvent(returnReview);
         return returnReview;

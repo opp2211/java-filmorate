@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.sql.ResultSet;
@@ -24,19 +26,22 @@ public class ReviewDbStorage {
     }
 
     public Review get(int id) {
-        String sql = "SELECT * FROM review WHERE review_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToReview, id);
+        try {
+            String sql = "SELECT * FROM review WHERE review_id = ?";
+            return jdbcTemplate.queryForObject(sql, this::mapRowToReview, id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Отзыв с id = " + id + " не найден!");
+        }
     }
 
-    public boolean update(Review review) {
+    public void update(Review review) {
         String sql = "UPDATE review " +
                 "SET content = ?, is_positive = ? " +
                 "WHERE review_id = ?";
-        int rowAffected = jdbcTemplate.update(sql,
+        jdbcTemplate.update(sql,
                 review.getContent(),
                 review.getIsPositive(),
                 review.getReviewId());
-        return rowAffected > 0;
     }
 
     public void delete(int id) {

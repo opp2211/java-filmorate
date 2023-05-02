@@ -2,9 +2,11 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.interfaces.DirectorStorage;
 
@@ -28,9 +30,13 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Director getById(int id) {
-        String sql = "SELECT director_id, name " +
-                "FROM director WHERE director_id = ? ";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToDirector, id);
+        try {
+            String sql = "SELECT director_id, name " +
+                    "FROM director WHERE director_id = ? ";
+            return jdbcTemplate.queryForObject(sql, this::mapRowToDirector, id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Режиссер с id = " + id + " не найден!");
+        }
     }
 
     @Override
@@ -47,15 +53,14 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public boolean update(Director director) {
+    public void update(Director director) {
         String sql = "UPDATE director SET " +
                 "name = ? " +
                 "WHERE director_id = ?";
-        int rowAffected = jdbcTemplate.update(sql,
+        jdbcTemplate.update(sql,
                 director.getName(),
                 director.getId()
         );
-        return rowAffected > 0;
     }
 
     @Override

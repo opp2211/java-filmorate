@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -23,8 +22,6 @@ public class FilmService {
     private final FilmDirectorStorage filmDirectorStorage;
     private final UserService userService;
 
-    private final GenreService genreService;
-
     private final FeedService feedService;
 
     public Film add(Film film) {
@@ -41,21 +38,16 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        if (!filmStorage.update(film)) {
-            throw new NotFoundException("Фильм с id = " + film.getId() + " не найден!");
-        }
+        get(film.getId());
+        filmStorage.update(film);
         updateGenres(film);
         updateDirectors(film);
         return get(film.getId());
     }
 
     public Film get(int id) {
-        try {
-            Film film = filmStorage.get(id);
-            return buildFilm(film);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Фильм с id = " + id + " не найден!");
-        }
+        Film film = filmStorage.get(id);
+        return buildFilm(film);
     }
 
     public List<Film> getAll() {
@@ -65,29 +57,29 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
+        get(filmId);
+        userService.get(userId);
         userLikeFilmStorage.addLike(filmId, userId);
         feedService.addLikeEvent(userId, filmId);
     }
 
     public void removeLike(int filmId, int userId) {
+        get(filmId);
+        userService.get(userId);
         userLikeFilmStorage.removeLike(filmId, userId);
         feedService.removeLikeEvent(userId, filmId);
     }
 
     public List<Film> getMostPopulars(int count, Integer genreId, Integer year) {
         if (genreId != null)
-            genreService.get(genreId);
+            genreStorage.get(genreId);
         List<Film> films = filmStorage.getMostPopulars(count, genreId, year);
         films.forEach(this::buildFilm);
         return films;
     }
 
     public List<Film> getByDirector(int directorId, String sortBy) {
-        try {
-            directorStorage.getById(directorId);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Режиссер с id = " + directorId + " не найден!");
-        }
+        directorStorage.getById(directorId);
         List<Film> films = filmStorage.getByDirector(directorId, sortBy);
         films.forEach(this::buildFilm);
         return films;
@@ -109,7 +101,7 @@ public class FilmService {
             films = filmStorage.findByName(queryAddSymbols);
         } else if (by.equals("director,title") || by.equals("title,director")) {
             films = filmStorage.findByDirectorAndName(queryAddSymbols);
-        }  else throw new IllegalStateException("Поиск по параметру " + by + " не предусмотрен");
+        } else throw new IllegalStateException("Поиск по параметру " + by + " не предусмотрен");
         films.forEach(this::buildFilm);
         return films;
     }

@@ -1,11 +1,9 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.Operation;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
@@ -28,12 +26,8 @@ public class FeedService {
     }
 
     public List<Event> getUserEvents(int id) {
-        try {
-            User user = userDbStorage.get(id);
-            return feedStorage.getUserEvents(user);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException(String.format("Пользователь c ID=%s не найден", id));
-        }
+        User user = userDbStorage.get(id);
+        return feedStorage.getUserEvents(user);
     }
 
     public void addFriendEvent(int userId, int friendId) {

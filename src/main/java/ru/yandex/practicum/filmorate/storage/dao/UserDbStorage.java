@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
@@ -60,9 +62,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User get(int id) {
-        String sql = "SELECT user_id, login, name, email, birthday " +
-                "FROM users WHERE user_id = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id);
+        try {
+            String sql = "SELECT user_id, login, name, email, birthday " +
+                    "FROM users WHERE user_id = ?";
+            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Пользователь с id = " + id + " не найден!");
+        }
     }
 
     @Override

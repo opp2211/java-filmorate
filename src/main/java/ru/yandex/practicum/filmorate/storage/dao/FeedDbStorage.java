@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.storage.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.enums.EventType;
 import ru.yandex.practicum.filmorate.enums.Operation;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.IFeedStorage;
@@ -36,8 +38,13 @@ public class FeedDbStorage implements IFeedStorage {
 
     @Override
     public Event getEvent(int id) {
-        String sql = "SELECT * FROM FEED WHERE ID = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToEvent, id);
+        try {
+            String sql = "SELECT * FROM FEED WHERE ID = ?";
+            return jdbcTemplate.queryForObject(sql, this::mapRowToEvent, id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Событие с id = " + id + " не найдено!");
+        }
+
     }
 
     @Override

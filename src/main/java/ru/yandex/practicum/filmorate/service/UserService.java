@@ -1,9 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
@@ -33,11 +31,7 @@ public class UserService {
     }
 
     public User get(int id) {
-        try {
-            return userStorage.get(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Пользователь с id = " + id + " не найден!");
-        }
+        return userStorage.get(id);
     }
 
     public List<User> getAll() {
@@ -58,6 +52,8 @@ public class UserService {
     }
 
     public void removeUserFriend(int userId, int friendId) {
+        get(userId);
+        get(friendId);
         userStorage.removeFriend(userId, friendId);
         userStorage.updateFriendship(friendId, userId, false);
         feedService.deleteFriendEvent(userId, friendId);
@@ -69,6 +65,8 @@ public class UserService {
     }
 
     public Collection<User> getMutualFriends(int userId, int friendId) {
+        get(userId);
+        get(friendId);
         return userStorage.getMutualFriends(userId, friendId);
     }
 }
