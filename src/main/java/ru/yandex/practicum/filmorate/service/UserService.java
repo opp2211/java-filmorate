@@ -12,17 +12,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
+    private final FeedService feedService;
 
     public User add(User user) {
-        return userStorage.add(user);
+        int newId = userStorage.add(user);
+        return get(newId);
     }
 
-    public void remove(int id) {
-        userStorage.remove(id);
+    public void delete(int id) {
+        get(id);
+        userStorage.delete(id);
     }
 
     public User update(User user) {
-        return userStorage.update(user);
+        get(user.getId());
+        userStorage.update(user);
+        return get(user.getId());
     }
 
     public User get(int id) {
@@ -35,19 +40,33 @@ public class UserService {
 
 
     public void addFriendToUser(int userId, int friendId) {
-        userStorage.addFriend(userId, friendId);
+        get(userId);
+        get(friendId);
+        boolean isAccepted = false;
+        if (userStorage.hasFriendship(friendId, userId)) {
+            isAccepted = true;
+            userStorage.updateFriendship(friendId, userId, true);
+        }
+        userStorage.addFriend(userId, friendId, isAccepted);
+        feedService.addFriendEvent(userId, friendId);
     }
 
     public void removeUserFriend(int userId, int friendId) {
+        get(userId);
+        get(friendId);
         userStorage.removeFriend(userId, friendId);
+        userStorage.updateFriendship(friendId, userId, false);
+        feedService.deleteFriendEvent(userId, friendId);
     }
 
     public List<User> getFriends(int userId) {
+        get(userId);
         return userStorage.getFriends(userId);
     }
 
     public Collection<User> getMutualFriends(int userId, int friendId) {
+        get(userId);
+        get(friendId);
         return userStorage.getMutualFriends(userId, friendId);
     }
-
 }

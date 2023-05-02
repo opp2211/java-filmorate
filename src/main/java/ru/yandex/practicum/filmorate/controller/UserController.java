@@ -3,7 +3,11 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FeedService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -16,6 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final FilmService filmService;
+    private final FeedService feedService;
 
     @GetMapping
     public List<User> getAll() {
@@ -37,8 +43,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User get(@PathVariable int id) {
-        return userService.get(id);
+    public User get(@PathVariable("id") int userId) {
+        return userService.get(userId);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void delete(@PathVariable int userId) {
+        userService.delete(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -52,12 +63,22 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getFriends(@PathVariable int id) {
-        return userService.getFriends(id);
+    public List<User> getFriends(@PathVariable("id") int userId) {
+        return userService.getFriends(userId);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> getMutualFriends(@PathVariable("id") int userId, @PathVariable int otherId) {
         return userService.getMutualFriends(userId, otherId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getUsersRecommendations(@PathVariable("id") int userId) {
+        return filmService.getUsersRecommendations(userId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Event> getUserFeed(@PathVariable int id) {
+        return feedService.getUserEvents(id);
     }
 }

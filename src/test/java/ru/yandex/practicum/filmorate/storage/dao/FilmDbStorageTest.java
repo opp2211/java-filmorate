@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmDbStorageTest {
+    private final UserService userService;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
@@ -42,9 +44,9 @@ public class FilmDbStorageTest {
                 .email("fda@asdf.ry")
                 .birthday(LocalDate.of(1880, 6, 17))
                 .build();
-        user1 = userStorage.add(user);
-        user2 = userStorage.add(user);
-        user3 = userStorage.add(user);
+        user1 = userService.add(user);
+        user2 = userService.add(user);
+        user3 = userService.add(user);
 
         List<Genre> genreList1 = List.of(
                 Genre.builder().id(2).build(),
@@ -97,7 +99,7 @@ public class FilmDbStorageTest {
     public void removeTest() {
         int initialSize = filmStorage.getAll().size();
 
-        filmStorage.remove(film1.getId());
+        filmStorage.delete(film1.getId());
 
         assertEquals(initialSize - 1, filmStorage.getAll().size());
         assertEquals(film2.getId(), filmStorage.get(film2.getId()).getId());
